@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio player</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 70vh;
+        }
+
+        .scrollable-list {
+            width: 700px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+            .scrollable-list li {
+                font-size: 30px;
+                margin-bottom: 30px;
+                list-style-type: none;
+                cursor: pointer;
+            }
+
+        .upload-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .upload-button button {
+                width: 150px;
+                height: 50px;
+                font-size: 16px;
+            }
+
+        .error-message {
+            color: red;
+            font-size: 18px;
+            opacity: 1;
+            transition: opacity 1s;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+        }
+
+            .error-message.fade-out {
+                opacity: 0;
+            }
+        #audioPlayer {
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="scrollable-list">
+            <ul>
+                {% for item in listAudioFile %}
+                <li onclick="playAudio('{{ item }}')">{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <audio id="audioPlayer" controls></audio>
+        <div class="upload-button">
+            <input type="file" id="fileInput">
+            <button onclick="uploadAudio()">Upload</button>
+        </div>
+    </div>
+    <script>
+        function uploadAudio() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('File uploaded successfully');
+                        location.reload();
+                    } else {
+                        console.error('Error uploading file');
+                        createMesegeError();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                    createMesegeError();
+                });
+        }
+        function createMesegeError() {
+            const errorMessage = "Failed to upload file, it is not audio or there is no space on the server";
+            const errorElement = document.createElement("p");
+            errorElement.classList.add("error-message");
+            errorElement.textContent = errorMessage;
+            document.body.appendChild(errorElement);
+
+            setTimeout(function () {
+                errorElement.classList.add("fade-out");
+                setTimeout(function () {
+                    errorElement.remove();
+                }, 1000);
+            }, 6000);
+        }
+        function playAudio(filename) {
+            const audioElement = document.getElementById("audioPlayer");
+            audioElement.src = `audio/${filename}`;
+            audioElement.play();
+        }
+    </script>
+</body>
+</html>
