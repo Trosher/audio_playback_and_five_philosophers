@@ -1,3 +1,5 @@
+# The project did not use venv environment. It will be necessary to create it or install missing packages locally.
+
 # Day 05 - Python Bootcamp
 
 ## Wibbly-wobbly, timey-wimey stuff
